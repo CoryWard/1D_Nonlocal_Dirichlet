@@ -1,0 +1,335 @@
+\documentclass[pra,onecolumn,superscriptaddress,aps]{revtex4}
+\usepackage{amsfonts}
+\usepackage{amssymb,latexsym,amsmath}
+\usepackage{times}
+\usepackage[caption=false]{subfig}
+\usepackage[usenames]{color}
+\usepackage{graphicx,tikz}
+\usepackage{fancyvrb}
+\usepackage{IEEEtrantools}
+
+\setlength\parindent{0pt}
+
+\begin{document}
+
+\title{Guide to the Collocation method of Huang and Oberman}
+
+
+\maketitle
+       
+We go over the main ideas of \cite{Oberman} as a quick reference for using the code.
+
+\section{Introduction}  
+We are interested in solving the following nonlocal Dirichlet boundary value problem numerically:
+\begin{equation}
+\begin{cases}
+\mathcal{L}u(x) = f(x), & x \in (-L, L) \\
+u(x) = g(x), & x \in (-L,L)^c
+\end{cases}
+\end{equation}
+where the nonlocal operator $\mathcal{L}$ is defined as
+\begin{equation} 
+\mathcal{L}u(x) = \int^\infty_{-\infty} [u(x) - u(x-y)] \nu(y) \; dy
+\label{eq2}
+\end{equation}
+and $\nu(x)$ is the kernel. Further, $f(x), g(x)$ are a given forcing function and boundary condition, respectively. \\
+
+We'll assume the following about $\nu$:
+\begin{itemize}
+\item[(1)] $\nu(x)$ is an even function
+\item[(2)] $\nu$ is locally integrable everywhere except possibly the origin
+\item[(3)] $\nu$ may have a singularity at the origin. If so, then Eq.~\eqref{eq2} should be considered as a Cauchy Principle Value integral near the origin. Regardless, this will be overcome later and can otherwise be forgotten.
+\item[(4)] $\int^\infty_{-1} \nu(y) \; dy < \infty$
+\item[(5)] $\int^1_{-1} y^2 \nu(y) \; dy < \infty$
+\item[(6)] $\int^1_{-1} y^4 \nu(y) \; dy < \infty$
+\end{itemize}
+
+Conditions (1)-(4) should hold for most kernels of interest, including the fractional Laplacian. Conditions (5) and (6) are more technical because they're needed for a certain approximation within the numerical scheme.\\
+
+The idea of the method is to first find a numerical approximation of $\mathcal{L}$ on the whole real line and then modify this approximation to discretize the Dirichlet boundary value problem. As a first step, we set up a numerical grid defined by $x_i=ih$, $i \in \mathbb{Z}$ and $h>0$. We then split Eq.~\eqref{eq2} into a, possibly, singular part and a tail:
+
+\begin{equation} 
+\mathcal{L}u(x) = \int^h_{-h} [u(x) - u(x-y)] \nu(y) \; dy +  \int_{|y| \geq h}[u(x) - u(x-y)] \nu(y) \; dy.
+\label{eq3}
+\end{equation}
+The first integral we'll denote by $\mathcal{L}_Su(x)$ and the second by $\mathcal{L}_T u(x)$.\\
+
+Keep in mind the idea is first to just replace the above two integrals by summations which only involve function evaluations on the grid points. The hope (and indeed what will happen) is that, when we go to the finite domain, we can still compute these integrals in terms of the (finite number of) grid points.
+
+\section{Discretize The Singular Integral}
+We first rewrite the singular integral, considering it as a Cauchy P.V.:
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}_Su(x) &=& \int^h_{-h} [u(x) - u(x-y)] \nu(y) \; dy \\[.2cm]
+							&:=& \lim_{\epsilon \to 0}  \int_\epsilon^h [u(x) -  u(x-y)] \nu(y) \; dy +\int^{-\epsilon}_{-h} [u(x) - u(x-y)] \nu(y) \; dy \\[.2cm]
+							&=& \int_0^h [2u(x) - u(x+y) - u(x-y)] \nu(y) \; dy. \\[.2cm]
+\end{IEEEeqnarray*}
+The last equality follows from changing variables, $z=-y$, in the second integral and using the evenness of $\nu$.\\
+
+Assuming $u \in C^4$ (and the two "technical" conditions (5),(6) of $\nu$), we can Taylor expand $u(x-y),u(x+y)$ to obtain that the above integral is
+\begin{IEEEeqnarray*}{lCl}
+-u''(x) \int_0^h  y^2 \nu(y) \; dy - \frac{u^{(4)}(\xi_1)}{12}\int_0^h  y^4 \nu(y) \; dy.\\[.2cm]
+\end{IEEEeqnarray*}
+We can also rewrite $u''(x)$, using a Taylor expansion, to get it's second order finite difference formula:
+\begin{IEEEeqnarray*}{lCl}
+-\bigg[\frac{u(x+h) -2u(x) + u(x-h)}{h^2} +  \frac{u^{(4)}(\xi_2)}{12}h^2\bigg]\int_0^h  y^2 \nu(y) \; dy - \frac{u^{(4)}(\xi_1)}{12}\int_0^h  y^4 \nu(y) \; dy.\\[.2cm]
+\end{IEEEeqnarray*}
+Simplifying this result, we have
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}_Su(x) &=& -\bigg[u(x+h) -2u(x) + u(x-h)\bigg] f_1(h) -\frac{u^{(4)}(\xi_2)}{12}f_2(h) - \frac{u^{(4)}(\xi_1)}{12} f_3(h)\\[.2cm]
+\end{IEEEeqnarray*}
+where
+\begin{IEEEeqnarray*}{lCl}
+f_1(h) = \frac{1}{h^2}\int^h_{0} y^2 \nu(y) \; dy  \quad , \quad f_2(h) =h^2 \int^h_{0} y^2 \nu(y) \; dy \quad , \quad f_3(h) = \int^h_{0} y^4 \nu(y) \; dy.
+\end{IEEEeqnarray*}
+For a specific grid point $x_i$, we can rewrite the above as
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}_Su(x_i) &=& \bigg[u(x_i) - u(x_{i-1})\bigg] f_1(h) + \bigg[u(x_i) - u(x_{i+1})\bigg] f_1(h)-\frac{u^{(4)}(\xi_2)}{12}f_2(h) - \frac{u^{(4)}(\xi_1)}{12} f_3(h).\\[.2cm]
+\end{IEEEeqnarray*}
+Although not apparent, writing it in this form will be useful later.
+
+\section{Discretizing The Tail Integral}
+Let $T(x)$ be the hat function 
+\begin{equation*}
+\begin{cases}
+1-\frac{|x|}{h}, & |x| \leq h \\
+0, & \text{otherwise}.
+\end{cases}
+\end{equation*}
+Then we can interpolate any function $f(x)$ on all of $\mathbb{R}$ as 
+\begin{equation*}
+Pf(y) := \sum\limits^\infty_{j=-\infty} f(x_j)T(y-x_j).
+\end{equation*}
+Note that this is just piecewise polynomial interpolation, where we've chosen the interpolating polynomials to be the linear (Lagrange) polynomials on there given domain $[x_i,x_{i+1}]$. We've written it in this form specifically because it will be useful below.\\
+
+Letting $f(y) = u(x_i) - u(x_i-y)$ and plugging it's interpolation into the tail integral we get
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}_Tu(x_i) &=& \int_{|y| \geq h} f(y) \nu(y) \; dy\\[.2cm]
+&\approx & \int_{|y| \geq h} Pf(y) \nu(y) \; dy\\[.2cm] 
+&= & \sum\limits^\infty_{j=-\infty} \bigg[(u(x_i)-u(x_i - x_j)) \int_{|y| \geq h} T(y-x_j)\nu(y) \; dy \bigg]. \\[.2cm] 
+\end{IEEEeqnarray*}
+Note that because the hat function is zero almost everywhere, the latter integral is actually defined on finite interval and, as we'll show later, it can be computed easily. Finally, because this is just polynomial interpolation, it can be shown that 
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}_Tu(x_i) &=& \mathcal{L}_TPf(x_i) + O\bigg(h^2 \int^\infty_h \nu(y) \; dy\bigg) .
+\end{IEEEeqnarray*}
+
+\section{Discretize the Nonlocal Operator: Part 1}
+Let
+\begin{IEEEeqnarray*}{lCl}
+f_1(h) = \frac{1}{h^2} \int^h_0 y^2 \nu(y) \; dy &\quad , \quad & f_3(h) = \int^h_0 y^4 \nu(y) \; dy \\[.2cm]
+f_2(h) = h^2 \int^h_0 y^2 \nu(y) \; dy &\quad , \quad & f_4(h) = h^2 \int^\infty_h \nu(y) \; dy,
+\end{IEEEeqnarray*}
+then collecting results from the previous two sections we can write
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}u(x_i) &=& \mathcal{L}_Su(x_i)  + \mathcal{L}_Tu(x_i) \\[.2cm]
+&=& \sum\limits^\infty_{j=-\infty}\bigg([u(x_i)-u(x_i - x_j)]\omega_j\bigg) +\\[.2cm]
+&&O\bigg(f_2(h)\bigg) + O\bigg(f_3(h)\bigg) + O\bigg(f_4(h)\bigg)
+\end{IEEEeqnarray*}
+where
+\begin{equation*}
+\omega_j =
+\begin{cases}
+0, & j=0\\[.2cm]
+f_1(h) + \int_{|y| \geq h} T(y-x_j)\nu(y) \; dy, & j = \pm 1 \\[.2cm]
+\int_{|y| \geq h} T(y-x_j)\nu(y) \; dy, & \text{otherwise}
+\end{cases}
+\end{equation*}
+Note that whenever $j=0$ we have that $u(x_i)-u(x_i - x_j)=0$ and hence we can define $\omega_0$ to be anything we want.\\
+
+The discretization we will ultimately use is given by simply dropping the big oh terms in the above expression. Note that the error is controlled by $h$ and that $\omega_{\pm 1}$ depends on $h$. Hence, in order for the method to be consistent, we need that $f_1(h)$ to be of lower order than each of $f_2$, $f_3$, and $f_4$. Further, if this turns out to be true, then the local error of the method is 
+\[ \text{Error} = \min O\bigg(f_2(h)\bigg), O\bigg(f_3(h)\bigg), O\bigg(f_4(h)\bigg).\]
+
+
+
+
+\section{Discretize the Nonlocal Operator: Part 2}
+We now derive formulas for the integrals containing hat functions. Assume $j \neq \pm 1$, then 
+\begin{IEEEeqnarray*}{lCl}
+\int_{y \geq |h|} T(y-x_j)\nu(y) \; dy &=& \int^{x_{j+1}}_{x_{j-1}} T(y-x_j)\nu(y) \; dy\\[.2cm] 
+&=& \int^{h}_{-h} T(z)\nu(z+x_j) \; dz, \hspace{2.2cm} z=y-x_j\\[.2cm] 
+&=& \frac{1}{h}\bigg[F(x_{j+1}) -2F(x_{j}) + F(x_{j-1})\bigg], \quad F''(z+x_j) = \nu(z+x_j).\\[.2cm] 
+\end{IEEEeqnarray*}
+The second line is obtained by the change of variables shown. The third line is obtained by finding a "double" antiderivative of $\nu$ and then doing integration by parts twice.\\
+
+When $j=1$ we don't integrate over the full hat function because half of the hat function is not in the domain of $|y|\geq h$:
+\begin{IEEEeqnarray*}{lCl}
+\int_{y \geq |h|} T(y-x_1)\nu(y) \; dy &=& \int^{x_{2}}_{x_{1}} T(y-x_j)\nu(y) \; dy\\[.2cm] 
+&=& \int^{h}_{0} T(z)\nu(z+x_1) \; dz, \hspace{2.2cm} z=y-x_1\\[.2cm] 
+&=& \-F'(x_1) + \frac{1}{h}\bigg[F(x_{2}) -F(x_{1})\bigg], \quad F''(z+x_j) = \nu(z+x_j).\\[.2cm] 
+\end{IEEEeqnarray*}
+
+Finally, note that because both $\nu(y)$ and $T(y)$ are even we have
+\begin{IEEEeqnarray*}{lCl}
+\int_{y \geq |h|} T(y-x_{-j})\nu(y) \; dy &=& \int_{y \geq |h|} T(y+x_{j})\nu(y) \; dy , \quad x_{-j}=-x_j\\[.2cm] 
+&=& \int_{z \geq |h|} T(-z+x_{j})\nu(-z) \; dz , \quad z=-y\\[.2cm] 
+&=& \int_{z \geq |h|} T(z-x_{j})\nu(z) \; dz , \quad \text{evenness}.\\[.2cm] 
+\end{IEEEeqnarray*}
+Looking at the definitions in the previous section, this immediately gives
+\begin{equation*}
+\omega_{-j} = \omega_j.
+\end{equation*}
+
+
+
+\section{The Dirichlet Problem}
+Having found a discretization of the nonlocal operator on the whole real line, we now turn to the finite domain, Dirichlet problem considered in the introduction. First, let $M$ be some {\it even} number such $L=\frac{M}{2}h$ and let $L_W=2L=Mh$. Now, unlike before, we want to split the nonlocal operator as
+\begin{IEEEeqnarray*}{lCl}
+\mathcal{L}u(x_i) &=& \int^h_{-h} [u(x_i) - u(x_i-y)] \nu(y) \; dy +  \int_{h \leq |y| \leq L_W}[u(x_i) - u(x_i-y)] \nu(y) \; dy \\[.2cm]
+&& + u(x_i) \int_{|y| \geq L_W}\nu(y) \; dy - \int_{|y| \geq L_W}u(x_i -y) \nu(y) \; dy.
+\end{IEEEeqnarray*}
+Call these integral (Ia), (Ib), (II), and (III) respectively.\\
+
+Due to the local nature of the hat functions, we can repeat all of the previous arguments to write
+
+\begin{IEEEeqnarray*}{lCl}
+\text{(Ia)} + \text{(Ib)} &=& \sum\limits^M_{j=-M}\bigg([u(x_i)-u(x_i - x_j)]\omega_j\bigg)\\[.2cm]
+&+&O\bigg(f_2(h)\bigg) + O\bigg(f_3(h)\bigg) + O\bigg(f_4(h)\bigg)
+\end{IEEEeqnarray*}
+where
+\begin{equation*}
+\omega_j =
+\begin{cases}
+f_1(h) - F'(x_1) + \frac{1}{h}[F(x_{2}) -F(x_{1})], & j = 1 \\[.2cm]
+\frac{1}{h}[F(x_{j+1}) - 2F(x_{j})+F(x_{j-1})] & 1<j <M \\[.2cm]
+F'(x_M) + \frac{1}{h}[F(x_{M-1}) -F(x_{M})], & j = M \\[.2cm]
+\end{cases}
+\end{equation*}
+and the $f_k(h)$ are identical to what they were previously. Note also that the $\omega_j$ are still even here as well.\\
+
+(II) can be calculated exactly (by hand); let $A =  \int_{|y| \geq L_W}\nu(y) \; dy$ so that $\text{(II)}=Au(x_i)$. Note that A doesn't require any $u$ data to be calculated.\\
+
+Lastly, (III) can also be calculated exactly by hand by noting that $u(x_i - y) = g(x_i - y)$ for all $|y| \geq L_W$; $L_W$ is the smallest number such that this hold true . Hence, defining $B_i = (III)$ to highlight it's dependence on $i$, we have
+\begin{equation*}
+B_i = \int_{|y| \geq L_W} g(x_i -y) \nu(y) \; dy.
+\end{equation*}
+Dropping the big oh terms (which tell us the exact order of the method), our numerical scheme is
+\begin{equation}
+\sum\limits^M_{j=-M}\bigg([u(x_i)-u(x_i - x_j)]\omega_j\bigg) + Au(x_i) - B_i = f(x_i)
+\end{equation}
+for $-\frac{M}{2}+1 \leq i \leq \frac{M}{2}-1$. 
+
+\subsection{Matrix Form}
+We can also put this in matrix form. To do this, we focus first on the summation and, for ease of presentation, we let $u_k:=u(x_k)$. We then have
+\begin{IEEEeqnarray*}{lCl}
+\sum\limits^M_{j=-M}\bigg([u_i-u_{i-j}]\omega_j\bigg) &=& u_i\sum\limits^M_{j=-M}\omega_j -\sum\limits^M_{j=-M} u_{i-j}\omega_j \\[.2cm]
+&=& u_i\sum\limits^M_{j=-M}\omega_j -\sum\limits_{|i-j| \leq \frac{M}{2}-1} u_{i-j}\omega_j -\sum\limits_{|i-j| > \frac{M}{2}-1} u_{i-j}\omega_j \\[.2cm]
+\end{IEEEeqnarray*}
+Note that in the last sum of the second line we have $u_{i-j}=g_{i-j}$. Continuing, and keeping in mind that $i$ is a fixed constant here:
+\begin{IEEEeqnarray*}{lCl}
+&=& u_i\sum\limits^M_{j=-M}\omega_j 
+-\sum\limits_{j= i- \frac{M}{2}+1}^{j= i+ \frac{M}{2}-1} u_{i-j}\omega_j 
+-\sum\limits^{i- \frac{M}{2}}_{j=-M} g_{i-j}\omega_j 
+-\sum\limits_{j=i+ \frac{M}{2}}^{M} g_{i-j}\omega_j .
+\end{IEEEeqnarray*}
+Rename the previous quantities as 
+\begin{equation*}
+c^1=\sum\limits^M_{j=-M}\omega_j  \quad, \quad c^2_i=-\sum\limits^{i- \frac{M}{2}}_{j=-M} g_{i-j}\omega_j \quad , \quad c^3_i=-\sum\limits_{j=i+ \frac{M}{2}}^{M} g_{i-j}\omega_j.
+\end{equation*} 
+ Then, continuing again, we have
+\begin{IEEEeqnarray*}{lCl}
+\sum\limits^M_{j=-M}\bigg([u_i-u_{i-j}]\omega_j\bigg) &=& u_i c^1 - c^2_i - c^3_i
+-\sum\limits_{j= i- \frac{M}{2}+1}^{j= i+ \frac{M}{2}-1} u_{i-j}\omega_j \\[.2cm]
+&=& u_i c^1- c^2_i - c^3_i - \sum\limits_{z=-\frac{M}{1}+1}^{\frac{M}{2}-1} u_{z}\omega_{i-z}.
+\end{IEEEeqnarray*}
+The last equality is obtained by the change of variables $z=i-j$. Letting $\hat{u}$ denote the vector
+\begin{equation*}
+\begin{bmatrix}
+u_{-\frac{M}{2}+1} \\
+\vdots \\
+u_{\frac{M}{2}-1}
+\end{bmatrix}
+\end{equation*}
+we can rewrite the above equation in matrix form as
+\begin{equation}
+c^1 \hat{u} - c^2  - c^3 - \hat{\omega}\hat{u}
+\end{equation}
+where $c^2, c^3$ are just vectorized versions of $c^2_i, c^3_i$ and $\hat{\omega}$ is the matrix given by
+\begin{equation*}
+\begin{bmatrix}
+\omega_0 & \omega_{-1} & \dots & \omega_{-M+2} \\
+\omega_1 & \omega_0 & \dots & \omega_{-M+3}\\
+\vdots & \vdots & \ddots\ & \vdots \\
+\omega_{M-2} & \omega_{M-3} & \dots & \omega_0
+\end{bmatrix}.
+\end{equation*}
+It's work pointing out the matrix is symmetric and in fact Toeplitz (hence there are very fast solvers).\\
+
+We can then write the Dirichlet problem as
+
+\begin{equation*}
+c^1 \hat{u} - c^2  - c^3 - \hat{\omega}\hat{u} + A\hat{u} - B = f
+\end{equation*}
+or, equivalently,
+\begin{equation*}
+\boxed{
+(c^1 I - \hat{\omega} + A I) \hat{u} = f + c^2 +c^3 + B
+}.
+\end{equation*}
+Again, the left hand side matrix is Toeplitz.
+
+\section{Example}
+Consider the Dirichlet problem
+\begin{equation}
+\begin{cases}
+\mathcal{L}u(x) = f(x), & x \in (-L, L) \\
+u(x) = g(x), & x \in (-L,L)^c
+\end{cases}
+\end{equation}
+with 
+\begin{IEEEeqnarray*}{lCl}
+\nu(y) = \frac{1}{2}e^{-|y|}.
+\end{IEEEeqnarray*}
+
+Then by direct calculation, we can calculate a number of the previously mentioned quantities:
+
+\begin{IEEEeqnarray*}{lCl}
+f_1(h) = \frac{1}{2}h^{-2} \bigg[ 2 - e^{-h}(h^2 + 2h +2)\bigg] = \frac{3}{2}h + O(h^2) \\[.2cm]
+f_2(h) = \frac{1}{3} h^5 + O(h^6)  \\[.2cm]
+f_3(h) = \frac{1}{5} h^5 + O(h^6)  \\[.2cm]
+f_4(h) = 2 h^2 + O(h^3)  \\[.2cm]
+\end{IEEEeqnarray*}
+Hence, the collocation method is consistent (since $f_1$ is of lower order than the other $f_k$) and will be of order $O(h^2)$ (since this is the least order among $f_2,f_3,f_4$).\\
+
+We also have the antiderivates of $\nu$:
+\begin{IEEEeqnarray*}{lCl}
+F(y) &=& \frac{1}{2}e^{-|y|}\\[.2cm]
+F'(y) &=& -\frac{1}{2} \text{sign} (y) e^{-|y|} \\[.2cm]
+F''(y) &=& \frac{1}{2}e^{-|y|} \\[.2cm]
+&=& \nu(y).
+\end{IEEEeqnarray*}
+From these all of the $\omega_j$ can now be calculated.\\
+
+And, lastly, we have the integral $A$:
+\[A = e^{-L_W}\]
+
+If we now give the boundary data $g(x) = \text{sech}(x)$ then we can calculate $B_i$:
+\begin{IEEEeqnarray*}{lCl}
+B_i &=& \frac{1}{2}e^{x_i} \log(e^{-2L_W}+e^{2x_i})-e^{x_i}x_i  \\[.2cm]
+&+&  \frac{1}{2}e^{-x_i} \log(e^{-2L_W}+e^{-2x_i})+e^{-x_i}x_i. 
+\end{IEEEeqnarray*}
+We can also calculate the vectors $c^2,c^3$ directly now.\\
+
+To summarize:
+\begin{equation*}
+\begin{cases}
+\nu(y)\Rightarrow f_k(y), \; F(y), \; A, \;  \omega_j, \; c^1 &\\
+g(x) \Rightarrow B, \; c^2, \; c^3. &
+\end{cases}
+\end{equation*}
+
+The last ingredient we need is the forcing function $f(x)$. Notice however that nothing else in the problem depends on this choice. Regardless, for our example we take
+\[f(x) = \text{sech}(x)- \frac{1}{2}e^{-x}\log(1+e^{2x}) - \frac{1}{2}e^{x}\log(1+e^{2x}) + xe^x.\]
+
+This example can be found in the correspond github matlab code under the system GK. Note that the solution of the Dirichlet problem in this case is actually $u(x) =\text{sech}(x)$ for any choice of $L$.
+
+
+\begin{thebibliography}{99}
+
+\bibitem{Oberman} Y. Huang and A. Oberman,
+SIAM J. Numer. Anal {\bf 52}, 3056 (2014).
+
+  \end{thebibliography}
+
+\end{document}
+
+
+
