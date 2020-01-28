@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840) (preloaded format=pdflatex 2018.11.30)  2 JAN 2020 12:37
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840) (preloaded format=pdflatex 2018.11.30)  27 JAN 2020 15:34
 entering extended mode
 **./WriteUp.tex
 (WriteUp.tex
@@ -806,38 +806,45 @@ Underfull \hbox (badness 10000) in paragraph at lines 308--310
 
  []
 
-[7] (WriteUp.aux) ) 
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 330.
+
+
+("/Users/cory/Library/Application Support/MiKTeX/texmfs/install/tex/latex/psnfs
+s/ot1pcr.fd"
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+) [7] (WriteUp.aux) ) 
 Here is how much of TeX's memory you used:
- 15559 strings out of 494889
- 302802 string characters out of 3177016
- 355073 words of memory out of 3000000
- 18899 multiletter control sequences out of 15000+200000
- 15284 words of font info for 38 fonts, out of 3000000 for 9000
+ 15620 strings out of 494889
+ 303627 string characters out of 3177016
+ 355088 words of memory out of 3000000
+ 18946 multiletter control sequences out of 15000+200000
+ 19113 words of font info for 54 fonts, out of 3000000 for 9000
  0 hyphenation exceptions out of 8191
- 55i,9n,48p,419b,227s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/Users/cory/Library/Application Support/MiKTeX/texmfs/insta
-ll/fonts/enc/dvips/base/8r.enc}</Users/cory/Library/Application Support/MiKTeX/
-texmfs/install/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/cory/Library/A
-pplication Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmmi10.
-pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/
-public/amsfonts/cm/cmmi5.pfb></Users/cory/Library/Application Support/MiKTeX/te
-xmfs/install/fonts/type1/public/amsfonts/cm/cmmi7.pfb></Users/cory/Library/Appl
-ication Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmr10.pfb>
-</Users/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/publ
-ic/amsfonts/cm/cmr5.pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/
-install/fonts/type1/public/amsfonts/cm/cmr7.pfb></Users/cory/Library/Applicatio
-n Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Use
-rs/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/am
-sfonts/cm/cmsy5.pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/inst
-all/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/cory/Library/Application S
-upport/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/symbols/msbm10.pfb></U
-sers/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/urw/tim
-es/utmb8a.pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/install/fo
-nts/type1/urw/times/utmr8a.pfb></Users/cory/Library/Application Support/MiKTeX/
-texmfs/install/fonts/type1/urw/times/utmri8a.pfb>
-Output written on WriteUp.pdf (7 pages, 165724 bytes).
+ 55i,9n,48p,419b,341s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/Users/cory/Library/Application Support/MiKTeX/texmfs/ins
+tall/fonts/enc/dvips/base/8r.enc}</Users/cory/Library/Application Support/MiKTe
+X/texmfs/install/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/cory/Library
+/Application Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmmi1
+0.pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type
+1/public/amsfonts/cm/cmmi5.pfb></Users/cory/Library/Application Support/MiKTeX/
+texmfs/install/fonts/type1/public/amsfonts/cm/cmmi7.pfb></Users/cory/Library/Ap
+plication Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmr10.pf
+b></Users/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/pu
+blic/amsfonts/cm/cmr5.pfb></Users/cory/Library/Application Support/MiKTeX/texmf
+s/install/fonts/type1/public/amsfonts/cm/cmr7.pfb></Users/cory/Library/Applicat
+ion Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/cm/cmsy10.pfb></U
+sers/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/
+amsfonts/cm/cmsy5.pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/in
+stall/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/cory/Library/Application
+ Support/MiKTeX/texmfs/install/fonts/type1/public/amsfonts/symbols/msbm10.pfb><
+/Users/cory/Library/Application Support/MiKTeX/texmfs/install/fonts/type1/urw/c
+ourier/ucrr8a.pfb></Users/cory/Library/Application Support/MiKTeX/texmfs/instal
+l/fonts/type1/urw/times/utmb8a.pfb></Users/cory/Library/Application Support/MiK
+TeX/texmfs/install/fonts/type1/urw/times/utmr8a.pfb></Users/cory/Library/Applic
+ation Support/MiKTeX/texmfs/install/fonts/type1/urw/times/utmri8a.pfb>
+Output written on WriteUp.pdf (7 pages, 176848 bytes).
 PDF statistics:
- 86 PDF objects out of 1000 (max. 8388607)
+ 90 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
